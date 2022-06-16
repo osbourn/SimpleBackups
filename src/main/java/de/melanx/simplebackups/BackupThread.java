@@ -18,9 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
@@ -33,6 +31,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -211,6 +210,35 @@ public class BackupThread extends Thread {
         }
 
         zipStream.close();
+
+        try {
+            broadcast("backup.sh started", Style.EMPTY.withColor(ChatFormatting.GOLD));
+            ProcessBuilder builder = new ProcessBuilder();
+            String outputFileName = outputFile.toString();
+            builder.command("bash", "~/processbackup.sh", outputFileName);
+            Process process = builder.start();
+            Executors.newSingleThreadExecutor().submit(() -> {
+                new BufferedReader(new InputStreamReader(process.getInputStream()))
+                        .lines().forEach(line -> {
+                            broadcast(line, Style.EMPTY.withColor(ChatFormatting.GOLD));
+                        });
+            });
+            Executors.newSingleThreadExecutor().submit(() -> {
+                new BufferedReader(new InputStreamReader(process.getErrorStream()))
+                        .lines().forEach(line -> {
+                            broadcast(line, Style.EMPTY.withColor(ChatFormatting.RED));
+                        });
+            });
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                broadcast("backup.sh finished", Style.EMPTY.withColor(ChatFormatting.GOLD));
+            } else {
+                broadcast("backup.sh failed with exit code " + exitCode, Style.EMPTY.withColor(ChatFormatting.RED));
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         return Files.size(outputFile);
     }
 
