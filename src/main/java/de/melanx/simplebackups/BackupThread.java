@@ -215,7 +215,7 @@ public class BackupThread extends Thread {
             broadcast("backup.sh started", Style.EMPTY.withColor(ChatFormatting.GOLD));
             ProcessBuilder builder = new ProcessBuilder();
             String outputFileName = outputFile.toString();
-            builder.command("bash", "~/processbackup.sh", outputFileName);
+            builder.command("sh", "-c", "bash -c \"" + outputFileName + "\"");
             Process process = builder.start();
             Executors.newSingleThreadExecutor().submit(() -> {
                 new BufferedReader(new InputStreamReader(process.getInputStream()))
