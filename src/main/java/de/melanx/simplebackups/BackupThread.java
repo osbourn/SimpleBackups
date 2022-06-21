@@ -212,7 +212,7 @@ public class BackupThread extends Thread {
         zipStream.close();
 
         try {
-            broadcast("backup.sh started", Style.EMPTY.withColor(ChatFormatting.GOLD));
+            broadcast("processbackup.sh started", Style.EMPTY.withColor(ChatFormatting.GOLD));
             ProcessBuilder builder = new ProcessBuilder();
             String outputFileName = outputFile.toString();
             builder.command("sh", "-c", "bash -c \"" + outputFileName + "\"");
@@ -231,9 +231,9 @@ public class BackupThread extends Thread {
             });
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                broadcast("backup.sh finished", Style.EMPTY.withColor(ChatFormatting.GOLD));
+                broadcast("processbackup.sh finished", Style.EMPTY.withColor(ChatFormatting.GOLD));
             } else {
-                broadcast("backup.sh failed with exit code " + exitCode, Style.EMPTY.withColor(ChatFormatting.RED));
+                broadcast("processbackup.sh failed with exit code " + exitCode, Style.EMPTY.withColor(ChatFormatting.RED));
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
